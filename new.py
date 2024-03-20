@@ -11,7 +11,7 @@ from keras.metrics import Accuracy
 from sklearn.metrics import confusion_matrix,accuracy_score, recall_score, precision_score, f1_score
 import time
 import keras
-import time
+import os
 
 
 
@@ -72,18 +72,29 @@ def make(imagess,labelss,many,s,v1):
         # # ac=accuracy_score(y_test, y_pred)
         # accuracy1 = model.evaluate(X_test, y_test)
         st.write(f'已完成:{fi/s}')
+#     model_path = "test.keras"
+
+# # 创建文件下载按钮
+#     download_button = st.download_button(label="点击下载模型文件", data=model_path, file_name="test.keras", mime="application/octet-stream")
+
+# # 如果按钮被点击，显示下载状态
+#     if download_button:
+#         st.write("文件下载中...")
+#         os.remove(model_path)
         # st.write(f'目前模型準確度{accuracy1}')
-    imgs = st.file_uploader("請上傳要辨識的照片", type=["jpg", "png"], accept_multiple_files=True)
-    for img in imgs:
-            img_pil = image.load_img(img, target_size=(100, 100), color_mode='grayscale')
-            img_array = image.img_to_array(img_pil)
-            v=img_array.reshape(-1,100,100,1)
-            v =v.astype('float32') / 255.0
+    # all_images=[]
+    # all_labels=[]
+    # imgs = st.file_uploader("請上傳要辨識的照片", type=["jpg", "png"], accept_multiple_files=True)
+    # for img in imgs:
+    #         img_pil = image.load_img(img, target_size=(100, 100), color_mode='grayscale')
+    #         img_array = image.img_to_array(img_pil)
+    #         v=img_array.reshape(-1,100,100,1)
+    #         v =v.astype('float32') / 255.0
 
-            v = model.predict(v)
-            st.write(v1[(np.argmax(v))])
+    #         v = model.predict(v)
+    #         st.write(v1[(np.argmax(v))])
 
-    model.save("test.keras")
+    #model.save("test.keras")
     return model
 
 
@@ -134,78 +145,15 @@ def main():
         z = st.slider('請選擇訓練次數', min_value=1, max_value=30, value=1)
         if st.button('開始訓練'):
             st.write("訓練已開始")
-            X = np.array(all_images)
-            y = np.array(all_labels)
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1/10, random_state=42)
-            y_tts=y_test.tolist()
-#plt.imshow(X_train[100])
-
-# 將標籤轉換為 one-hot 編碼
-            y_train = to_categorical(y_train, num_classes=cate)
-            y_test = to_categorical(y_test, num_classes=cate)
-
-            X_train = X_train.astype('float32') / 255.0
-            X_test = X_test.astype('float32') / 255.0
-
-#plt.imshow(X_train[40])
-#當你將 X_train 變形為 (-1, 28, 28, 1) 時,-1 的意思是自動計算樣本數
-            X_train = X_train.reshape(-1,100, 100, 1)
-            X_test = X_test.reshape(-1,100, 100, 1)
-            model = Sequential([
-    #在你的模型中，input_shape 設置為 (28, 28, 1)，這意味著每個輸入圖像的形狀應該是 (28, 28, 1)，而不是 (28, 28, 1)。這是因為模型期望接收單個圖像的形狀，而不是整個訓練集的形狀。所以在訓練模型時，你不需要指定樣本數，只需要指定圖像的高度、寬度和通道數。
-                    Conv2D(64, (3,3), activation='relu', padding='same', input_shape=(100,100, 1)),
-                    Conv2D(64, (3,3), activation='relu', padding='same'),
-                    MaxPooling2D((2, 2)),
-                    Conv2D(64, (3,3), activation='relu', padding='same'),
-                    Conv2D(64, (3,3), activation='relu', padding='same'),
-                    MaxPooling2D((2, 2)),
-                    Flatten(),
-                    Dense(512, activation='relu'),
-                    Dropout(0.5),
-                    Dense(cate, activation='softmax')
-            ])
-            model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
-            checkpoint = ModelCheckpoint("best_model.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-            fi=0
-            for i in range(z):
-                model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1, batch_size=64, callbacks=[checkpoint])
-                fi=fi+1
-                y_pred = model.predict(X_test)
-                ytf=[]
-                for i in y_pred:
-                    ytf.append(int(np.argmax(i)))
-                    print(ytf)
-                g=0
-                for i in range(len(ytf)):
-                    if ytf[i]==y_tts[i]:
-                        g=g+1
-                st.write(f'目前模型準確度:{g/len(ytf)}')
+            trained_model = make(all_images,all_labels,cate,z,v)
+            st.session_state.trained_model = trained_model
+            download_button = st.download_button(label="下載模型文件", data="trained_model", file_name="trained_model.keras", mime="application/octet-stream")
 
 
-                
-        # accuracy = Accuracy()
-        # accuracy.update_state(y_test, y_pred)
-        # result = accuracy.result().numpy()
-        # st.write("Accuracy:", result)
-        # # ac=accuracy_score(y_test, y_pred)
-        # accuracy1 = model.evaluate(X_test, y_test)
-                st.write(f'已完成:{fi/z}')
 
-        # st.write(f'目前模型準確度{accuracy1}')
-        #if st.button('使用模型'):
-            v1=[]
-            imgs = st.file_uploader("請上傳要辨識的照片", type=["jpg", "png"], accept_multiple_files=True)
-            for img in imgs:
-                img_pil = image.load_img(img, target_size=(100, 100), color_mode='grayscale')
-                img_array = image.img_to_array(img_pil)
-                img_=img_array.reshape(-1,100,100,1)
-                img_ =img_.astype('float32') / 255.0
+            if download_button:
+                st.write("文件下載中...")
 
-                imgf = model.predict(img_)
-                v1.append(v[(np.argmax(imgf))])
-            st.write(v1)
-            time.sleep(30)
-            st.write(v1)
         
 
 if __name__ == "__main__":
