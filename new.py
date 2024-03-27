@@ -146,6 +146,7 @@ def main():
         if st.button('開始訓練'):
             st.write("訓練已開始")
             trained_model = make(all_images,all_labels,cate,z,v)
+            trained_model.save('123.keras')
             st.session_state.trained_model = trained_model
             download_button = st.download_button(label="下載模型文件", data="trained_model", file_name="trained_model.keras", mime="application/octet-stream")
 
