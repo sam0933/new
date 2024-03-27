@@ -147,18 +147,18 @@ def main():
         if st.button('開始訓練'):
             st.write("訓練已開始")
             trained_model = make(all_images,all_labels,cate,z,v)
-            trained_model.save("trained_model.keras")
+            trained_model.save("trained_model.h5")
 
 # 加载已经训练好的模型
             # trained_model = load_model("trained_model.h5")  # 示例中的加载方式，实际使用时根据你的模型加载方式修改
 
 # 将模型文件读取为二进制数据
-            with open("trained_model.keras", "rb") as model_file:
+            with open("trained_model.h5", "rb") as model_file:
                 model_binary = model_file.read()
 
 # 创建下载按钮
             #要用h5黨才能存   
-            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model321.keras", mime="application/octet-stream")
+            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model321.h5", mime="application/octet-stream")
 
 # # 创建文件下载按钮
 #             download_button = st.download_button(label="点击下载模型文件", data=model_path, file_name="test.keras", mime="application/octet-stream")
