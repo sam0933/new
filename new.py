@@ -13,10 +13,12 @@ from sklearn.metrics import confusion_matrix,accuracy_score, recall_score, preci
 import time
 import keras
 import os
+from tensorflow.keras.models import load_model
 
 
 
-def make(imagess,labelss,many,s,v1):
+
+def make(imagess,labelss,many,s,ph):
     X = np.array(imagess)
     y = np.array(labelss)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1/10, random_state=42)
@@ -32,11 +34,11 @@ def make(imagess,labelss,many,s,v1):
 
 #plt.imshow(X_train[40])
 #當你將 X_train 變形為 (-1, 28, 28, 1) 時,-1 的意思是自動計算樣本數
-    X_train = X_train.reshape(-1,100, 100, 1)
-    X_test = X_test.reshape(-1,100, 100, 1)
+    X_train = X_train.reshape(-1,ph,ph, 1)
+    X_test = X_test.reshape(-1,ph,ph, 1)
     model = Sequential([
     #在你的模型中，input_shape 設置為 (28, 28, 1)，這意味著每個輸入圖像的形狀應該是 (28, 28, 1)，而不是 (28, 28, 1)。這是因為模型期望接收單個圖像的形狀，而不是整個訓練集的形狀。所以在訓練模型時，你不需要指定樣本數，只需要指定圖像的高度、寬度和通道數。
-        Conv2D(64, (3,3), activation='relu', padding='same', input_shape=(100,100, 1)),
+        Conv2D(64, (3,3), activation='relu', padding='same', input_shape=(ph,ph, 1)),
         Conv2D(64, (3,3), activation='relu', padding='same'),
         MaxPooling2D((2, 2)),
         Conv2D(64, (3,3), activation='relu', padding='same'),
@@ -122,7 +124,8 @@ def main():
 
 
     # 增加一個選擇框，讓用戶選擇 x 的值
-    cate = st.slider('請選擇要分的類別數', min_value=1, max_value=10, value=1)
+    cate = st.slider('請選擇要分的類別數', min_value=1, max_value=10, value=2)
+    ph1 = st.slider('請選擇畫質', min_value=1, max_value=500, value=100)
     a=0
     check=0
     v=[]
@@ -131,7 +134,7 @@ def main():
         lab = st.text_input(f"label {i+1}:")
         imgs = st.file_uploader(f"上傳第 {i+1} 種圖片", type=["jpg", "png"], accept_multiple_files=True)
         for img in imgs:
-            img_pil = image.load_img(img, target_size=(100, 100), color_mode='grayscale')
+            img_pil = image.load_img(img, target_size=(ph1,ph1), color_mode='grayscale')
             img_array = image.img_to_array(img_pil)
             all_images.append(img_array)
             all_labels.append(a)
@@ -146,19 +149,15 @@ def main():
         z = st.slider('請選擇訓練次數', min_value=1, max_value=30, value=1)
         if st.button('開始訓練'):
             st.write("訓練已開始")
-            trained_model = make(all_images,all_labels,cate,z,v)
-            trained_model.save("trained_model.h5")
-
-# 加载已经训练好的模型
-            # trained_model = load_model("trained_model.h5")  # 示例中的加载方式，实际使用时根据你的模型加载方式修改
-
-# 将模型文件读取为二进制数据
-            with open("trained_model.h5", "rb") as model_file:
+            trained_model = make(all_images,all_labels,cate,z,ph1)
+            trained_model.save('model.h5')
+            with open('model.h5','rb') as model_file:
                 model_binary = model_file.read()
+            os.remove('model.h5')
 
 # 创建下载按钮
             #要用h5黨才能存   
-            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model321.h5", mime="application/octet-stream")
+            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model.h5", mime="application/octet-stream")
 
 # # 创建文件下载按钮
 #             download_button = st.download_button(label="点击下载模型文件", data=model_path, file_name="test.keras", mime="application/octet-stream")
@@ -166,10 +165,12 @@ def main():
 
             if download_button:
                 st.write("文件下載中...")
+            
 
         
 
 if __name__ == "__main__":
     main()
+
 
 
