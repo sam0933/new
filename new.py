@@ -8,6 +8,7 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNor
 from keras.callbacks import ModelCheckpoint
 import streamlit as st
 from keras.metrics import Accuracy
+from tensorflow.keras.models import load_model
 from sklearn.metrics import confusion_matrix,accuracy_score, recall_score, precision_score, f1_score
 import time
 import keras
@@ -146,10 +147,21 @@ def main():
         if st.button('開始訓練'):
             st.write("訓練已開始")
             trained_model = make(all_images,all_labels,cate,z,v)
-            trained_model.save('123.keras')
-            st.session_state.trained_model = trained_model
-            download_button = st.download_button(label="下載模型文件", data="trained_model", file_name="trained_model.keras", mime="application/octet-stream")
+            trained_model.save("trained_model.keras")
 
+# 加载已经训练好的模型
+            # trained_model = load_model("trained_model.h5")  # 示例中的加载方式，实际使用时根据你的模型加载方式修改
+
+# 将模型文件读取为二进制数据
+            with open("trained_model.keras", "rb") as model_file:
+                model_binary = model_file.read()
+
+# 创建下载按钮
+            #要用h5黨才能存   
+            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model.h5", mime="application/octet-stream")
+
+# # 创建文件下载按钮
+#             download_button = st.download_button(label="点击下载模型文件", data=model_path, file_name="test.keras", mime="application/octet-stream")
 
 
             if download_button:
@@ -159,3 +171,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
