@@ -158,7 +158,7 @@ def main():
 
 # 创建下载按钮
             #要用h5黨才能存   
-            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model.h5", mime="application/octet-stream")
+            download_button = st.download_button(label="下载模型文件", data=model_binary, file_name="trained_model321.h5", mime="application/octet-stream")
 
 # # 创建文件下载按钮
 #             download_button = st.download_button(label="点击下载模型文件", data=model_path, file_name="test.keras", mime="application/octet-stream")
