@@ -150,7 +150,7 @@ def main():
         if st.button('開始訓練'):
             st.write("訓練已開始")
             trained_model = make(all_images,all_labels,cate,z,ph1)
-            trained_model.save('model.h5')
+            trained_model.save('model.h5',save_format='h5')
             with open('model.h5','rb') as model_file:
                 model_binary = model_file.read()
             os.remove('model.h5')
@@ -171,6 +171,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
